@@ -1,0 +1,137 @@
+package com.wjj.home.socket;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import com.wjj.home.gpio.GpioBean;
+
+public class NetSocket {
+	
+	private GpioBean bean;
+	private String localhost;
+	private Socket socket;
+	private Thread thread;
+	private boolean isrun;
+	
+	private String sendmsg = "pi";
+	
+	public NetSocket(GpioBean bean,String ip){
+		this.bean = bean;
+		this.localhost = !ip.equals("")?ip:"127.0.0.1";
+		try {
+			init();
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private void init() throws UnknownHostException, IOException{
+		//客户端
+		this.isrun = true;
+		thread = new Thread(runnable);
+		thread.start();
+	}
+	
+	public void send(String msg){
+		this.sendmsg = msg;
+	}
+	
+	private void client() throws IOException{
+		//1、创建客户端Socket，指定服务器地址和端口
+		socket = new Socket(localhost,10086);
+		count = 0;
+		//2、获取输出流，向服务器端发送信息
+		if(!socket.isClosed()){
+			OutputStream os = socket.getOutputStream();//字节输出流
+			PrintWriter pw =new PrintWriter(os);//将输出流包装成打印流
+			pw.write(sendmsg);
+			pw.flush();
+			//os.close();
+		}else{
+			System.out.println("socket关闭1");
+		}
+		socket.shutdownOutput();
+		
+		//3、获取输入流，并读取服务器端的响应信息
+		if(!socket.isClosed()){
+			InputStream is = socket.getInputStream();
+			BufferedReader br = new BufferedReader(new InputStreamReader(is));
+			String info = null;
+			while((info=br.readLine()) != null){
+			 System.out.println("服务器说："+info);
+			}
+			
+			bean.getGpio("GPIO_00").high();
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			bean.getGpio("GPIO_00").low();
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			//4、关闭资源
+			br.close();
+			is.close();
+			socket.close();
+			socket = null;
+		}else{
+			System.out.println("socket关闭2");
+		}
+		
+	}
+	
+	private int count = 0;
+	private Runnable runnable = new Runnable(){
+		@Override
+		public void run(){
+			// TODO Auto-generated method stub
+			try {
+				while(isrun){
+					client();
+					Thread.sleep(5000);
+				}
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				isrun = false;
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				isrun = false;
+				e.printStackTrace();
+			} finally{
+				try {
+					if(count>=3){
+						System.out.println("连接不上对方服务器");
+						System.exit(0);
+					}else{
+						count++;
+						Thread.sleep(1000*10);
+						isrun = true;
+						thread = new Thread(runnable);
+						thread.start();
+					}
+					
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+	};
+}

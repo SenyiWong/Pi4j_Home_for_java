@@ -1,0 +1,105 @@
+package com.wjj.home.gpio;
+
+import com.pi4j.io.gpio.GpioController;
+import com.pi4j.io.gpio.GpioFactory;
+import com.pi4j.io.gpio.GpioPinDigitalOutput;
+import com.pi4j.io.gpio.PinState;
+import com.pi4j.io.gpio.RaspiPin;
+
+public class GpioBean {
+	
+	private class IoNameToPin{
+		
+		public IoNameToPin(String name,int i){
+			this.i = i;
+			this.name = name;
+		}
+		
+		public int i;
+		public String name;
+	}
+	
+	private final GpioController gpioController = GpioFactory.getInstance();
+	private GpioPinDigitalOutput[] gpios = new GpioPinDigitalOutput[16];
+	private IoNameToPin[] intps = new IoNameToPin[16];
+
+	public GpioBean(){
+		gpios[0] = gpioController.provisionDigitalOutputPin(RaspiPin.GPIO_00,"",PinState.LOW);
+		gpios[1] = gpioController.provisionDigitalOutputPin(RaspiPin.GPIO_01,"",PinState.LOW);
+		gpios[2] = gpioController.provisionDigitalOutputPin(RaspiPin.GPIO_02,"",PinState.LOW);
+		gpios[3] = gpioController.provisionDigitalOutputPin(RaspiPin.GPIO_03,"",PinState.LOW);
+		gpios[4] = gpioController.provisionDigitalOutputPin(RaspiPin.GPIO_04,"",PinState.LOW);
+		gpios[5] = gpioController.provisionDigitalOutputPin(RaspiPin.GPIO_05,"",PinState.LOW);
+		gpios[6] = gpioController.provisionDigitalOutputPin(RaspiPin.GPIO_06,"",PinState.LOW);
+		gpios[7] = gpioController.provisionDigitalOutputPin(RaspiPin.GPIO_07,"",PinState.LOW);
+		gpios[8] = gpioController.provisionDigitalOutputPin(RaspiPin.GPIO_20,"",PinState.LOW);
+		gpios[9] = gpioController.provisionDigitalOutputPin(RaspiPin.GPIO_21,"",PinState.LOW);
+		gpios[10] = gpioController.provisionDigitalOutputPin(RaspiPin.GPIO_22,"",PinState.LOW);
+		gpios[11] = gpioController.provisionDigitalOutputPin(RaspiPin.GPIO_23,"",PinState.LOW);
+		gpios[12] = gpioController.provisionDigitalOutputPin(RaspiPin.GPIO_24,"",PinState.LOW);
+		gpios[13] = gpioController.provisionDigitalOutputPin(RaspiPin.GPIO_25,"",PinState.LOW);
+		gpios[14] = gpioController.provisionDigitalOutputPin(RaspiPin.GPIO_26,"",PinState.LOW);
+		gpios[15] = gpioController.provisionDigitalOutputPin(RaspiPin.GPIO_27,"",PinState.LOW);
+		
+		IoNameToPin intp0 = new IoNameToPin("GPIO_00",0);
+		intps[0] = intp0;
+		IoNameToPin intp1 = new IoNameToPin("GPIO_01",1);
+		intps[1] = intp1;
+		IoNameToPin intp2 = new IoNameToPin("GPIO_02",2);
+		intps[2] = intp2;
+		IoNameToPin intp3 = new IoNameToPin("GPIO_03",3);
+		intps[3] = intp3;
+		IoNameToPin intp4 = new IoNameToPin("GPIO_04",4);
+		intps[4] = intp4;
+		IoNameToPin intp5 = new IoNameToPin("GPIO_05",5);
+		intps[5] = intp5;
+		IoNameToPin intp6 = new IoNameToPin("GPIO_06",6);
+		intps[6] = intp6;
+		IoNameToPin intp7 = new IoNameToPin("GPIO_07",7);
+		intps[7] = intp7;
+		IoNameToPin intp8 = new IoNameToPin("GPIO_20",8);
+		intps[8] = intp8;
+		IoNameToPin intp9 = new IoNameToPin("GPIO_21",9);
+		intps[9] = intp9;
+		IoNameToPin intp10 = new IoNameToPin("GPIO_22",10);
+		intps[10] = intp10;
+		IoNameToPin intp11 = new IoNameToPin("GPIO_23",11);
+		intps[11] = intp11;
+		IoNameToPin intp12 = new IoNameToPin("GPIO_24",12);
+		intps[12] = intp12;
+		IoNameToPin intp13 = new IoNameToPin("GPIO_25",13);
+		intps[13] = intp13;
+		IoNameToPin intp14 = new IoNameToPin("GPIO_26",14);
+		intps[14] = intp14;
+		IoNameToPin intp15 = new IoNameToPin("GPIO_27",15);
+		intps[15] = intp15;
+	}
+	
+	public GpioPinDigitalOutput getGpio(String name){
+		for(IoNameToPin intp : intps){
+			if (intp.name.equals(name)) {
+				return gpios[intp.i];
+			}
+		}
+		return null;
+	}
+	
+	public void setGpioPin(String name,boolean is){
+		for(IoNameToPin intp : intps){
+			if (intp.name.equals(name)) {
+				if(is){
+					gpios[intp.i].high();
+				}else{
+					gpios[intp.i].low();
+				}
+				return;
+			}
+		}
+	}
+	
+	public void offGpioAll(){
+		for(GpioPinDigitalOutput gpio:gpios){
+			gpio.low();
+		}
+	}
+}

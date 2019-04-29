@@ -22,7 +22,10 @@ public class GpioBean {
 	private final GpioController gpioController = GpioFactory.getInstance();
 	private GpioPinDigitalOutput[] gpios = new GpioPinDigitalOutput[16];
 	private IoNameToPin[] intps = new IoNameToPin[16];
-
+	
+	/**
+	  * 初始化gpio0-7和 gpio20-27 共16个端口
+	  */
 	public GpioBean(){
 		gpios[0] = gpioController.provisionDigitalOutputPin(RaspiPin.GPIO_00,"",PinState.LOW);
 		gpios[1] = gpioController.provisionDigitalOutputPin(RaspiPin.GPIO_01,"",PinState.LOW);
@@ -75,6 +78,9 @@ public class GpioBean {
 		intps[15] = intp15;
 	}
 	
+	/**
+	 *  更具名称取gpio口
+ 	 */
 	public GpioPinDigitalOutput getGpio(String name){
 		for(IoNameToPin intp : intps){
 			if (intp.name.equals(name)) {
@@ -84,6 +90,9 @@ public class GpioBean {
 		return null;
 	}
 	
+	/**
+	 *  更具名称设置gpio口高低电平
+ 	 */
 	public void setGpioPin(String name,boolean is){
 		for(IoNameToPin intp : intps){
 			if (intp.name.equals(name)) {
